@@ -1,0 +1,32 @@
+[
+    {
+        "title": "Text Editor",
+        "text": "Which text editors do you use?",
+        "multivote": true,
+        "locked": false,
+        "show_count": false,
+        "options":
+        [
+            "Vim",
+            "Sublime",
+            "Atom",
+            "Notepad++",
+            "Other"
+        ]
+    },
+    {
+        "title": "Operating System",
+        "text": "Which is you favorite desktop Operating System?",
+        "multivote": false,
+        "locked": false,
+        "show_count": true,
+        "options":
+        [
+            "Windows",
+            "Linux",
+            "Mac",
+            "BSD",
+            "Other"
+        ]
+    }
+]
