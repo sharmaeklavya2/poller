@@ -1,4 +1,4 @@
-# Api Examples
+# API Examples
 
 You can use curl, python's urllib, firebug, etc. for making POST requests.
 I will use `curl` for all example requests here since that is simple to use from any shell.

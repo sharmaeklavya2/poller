@@ -3,3 +3,4 @@ six
 psycopg2
 mypy-lang
 typed-ast
+pyflakes

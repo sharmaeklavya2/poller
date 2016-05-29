@@ -7,13 +7,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
 
-import json
 from collections import OrderedDict
 try:
     import collections.abc as collections_abc
 except ImportError:
     import collections as collections_abc
-from six import text_type
 
 from main.models import Question, Option, Choice
 from main.models import choose, unchoose, all_ques_data, get_all_oids_set

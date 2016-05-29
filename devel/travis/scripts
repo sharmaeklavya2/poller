@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+set -x
+
+devel/lint_all.py
+python manage.py makemigrations
+python manage.py migrate
+devel/populate.py lib/test_data.json
+devel/build_api_examples.py > /dev/null

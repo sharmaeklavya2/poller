@@ -40,7 +40,7 @@ The settings are stored in `project_conf/settings/`.
 To modify your settings, copy contents of `default.py` to `local.py` and make modifications to `local.py`.
 
 This app supports Django's admin interface.
-Visit http://localhost:8000/admin/ to view it.
+Visit [http://localhost:8000/admin/](http://localhost:8000/admin/) to view it.
 You will need a superuser account to access it.
 You can create it using:
 
@@ -57,3 +57,8 @@ See `docs/api_ref.md` for API endpoint reference.
 Copyright 2016 - Eklavya Sharma
 
 Licensed under [GNU GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)
+
+## Third party code
+
+* `devel/lister.py` - From [Zulip](https://github.com/zulip/zulip/)
+* `devel/lint_all.py` - From [Zulip](https://github.com/zulip/zulip/)

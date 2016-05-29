@@ -60,7 +60,6 @@ def send_request(request_func, url, data, content_type=None):
         return request_func(url, enc_data, content_type=content_type)
 
 def do_test_basic_auth(test, username, password, status_code, output=None, separator=':'):
-    user = User.objects.get(username=username)
     credentials = username + separator + password
     smashed_credentials = b64encode(credentials.encode('utf-8')).decode('utf-8')
     auth_header = 'Basic ' + smashed_credentials
@@ -82,7 +81,7 @@ def do_test_login(test, username, password, status_code1, status_code2, content_
     else:
         login_data = [username, password]
     data = encode_data(login_data)
-    login_response = send_request(test.client.post, '/api/login/', login_data, content_type)
+    login_response = send_request(test.client.post, '/api/login/', data, content_type)
 
     test.assertEqual(login_response.status_code, status_code1)
     if output1 is not None:

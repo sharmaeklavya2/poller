@@ -11,6 +11,7 @@ PROJECT_TITLE = 'Poller'
 
 ALLOWED_HOSTS = ['*']
 X_FRAME_OPTIONS = 'DENY'
+DEBUG = True
 
 # Application definition
 
@@ -84,13 +85,6 @@ admin.site.site_title = PROJECT_TITLE + " admin"
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Import local settings
-
-try:
-    from .local import *
-except ImportError:
-    from .default import *
-
 # Misc
 
 ALLOW_REG = True
@@ -99,3 +93,10 @@ if DEBUG:
     JSON_INDENT = 2
 else:
     JSON_INDENT = None
+
+# Import local settings
+
+try:
+    from .local import *
+except ImportError:
+    from .default import *

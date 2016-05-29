@@ -11,7 +11,7 @@ from main.models import Question, Option, Choice
 from main.models import choose, unchoose
 
 from lib import populate
-from lib.exceptions import BadDataError, ContentTypeError
+from lib.exceptions import BadDataError
 from lib.response import get_response_str
 from lib.testing import encode_data, do_test_login, do_test_basic_auth, do_logout, do_test_register, do_test_vote
 

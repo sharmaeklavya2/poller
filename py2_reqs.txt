@@ -2,3 +2,4 @@ Django
 six
 psycopg2
 typing
+pyflakes
