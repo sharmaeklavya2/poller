@@ -15,6 +15,7 @@ from lib import populate
 from lib.exceptions import BadDataError
 from lib.response import get_response_str
 from lib.testing import encode_data, do_test_login, do_test_basic_auth, do_logout, do_test_register, do_test_vote
+from lib.textutil import force_text
 
 from six import text_type
 
@@ -76,7 +77,7 @@ class TestTesting(TestCase):
 
     def test_encode_dict_json(self):
         d1 = {"username": "user1", "password": "pass1"}
-        res1 = json.dumps(d1)
+        res1 = force_text(json.dumps(d1))
         self.assertEqual(encode_data(d1, "application/json"), res1)
 
     def test_encode_list_form1(self):
@@ -90,10 +91,10 @@ class TestTesting(TestCase):
 
     def test_encode_list_json(self):
         l1 = ['a', 'b']
-        res1 = json.dumps(l1)
+        res1 = force_text(json.dumps(l1))
         self.assertEqual(encode_data(l1, "application/json"), res1)
         l2 = [1, 2]
-        res2 = json.dumps(l2)
+        res2 = force_text(json.dumps(l2))
         self.assertEqual(encode_data(l2, "application/json"), res2)
 
 class TestModels(TestCase):

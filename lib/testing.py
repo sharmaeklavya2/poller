@@ -20,6 +20,7 @@ from main.models import choose
 
 from lib.exceptions import BadDataError, ContentTypeError
 from lib.response import get_response_str
+from lib.textutil import force_text
 
 FORM_CONTENT_TYPE = 'application/x-www-form-urlencoded'
 
@@ -35,7 +36,7 @@ def encode_data(data, content_type=None):
         if data is None:
             raise BadDataError("empty_json")
         try:
-            return json.dumps(data, cls=DjangoJSONEncoder)
+            return force_text(json.dumps(data, cls=DjangoJSONEncoder))
         except ValueError:
             raise BadDataError("invalid_format")
     elif content_type.startswith(FORM_CONTENT_TYPE):
