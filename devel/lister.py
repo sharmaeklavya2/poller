@@ -9,7 +9,6 @@ import subprocess
 import re
 from collections import defaultdict
 import argparse
-from six.moves import filter
 from typing import Union, List, Dict
 
 def get_ftype(fpath, use_shebang):
@@ -59,7 +58,7 @@ def list_files(targets=[], ftypes=[], use_shebang=True, modified_only=False,
 
     files_gen = (x.strip() for x in subprocess.check_output(cmdline, universal_newlines=True).split('\n'))
     # throw away empty lines and non-files (like symlinks)
-    files = list(filter(os.path.isfile, files_gen))
+    files = [f for f in files_gen if os.path.isfile(f)]
 
     result_dict = defaultdict(list) # type: Dict[str, List[str]]
     result_list = [] # type: List[str]

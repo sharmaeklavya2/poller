@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 
 import os
 import json
+import six
 
 from main.models import Question, Option, Choice
 from main.models import choose, unchoose
@@ -14,6 +15,8 @@ from lib import populate
 from lib.exceptions import BadDataError
 from lib.response import get_response_str
 from lib.testing import encode_data, do_test_login, do_test_basic_auth, do_logout, do_test_register, do_test_vote
+
+from six import text_type
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEST_DATA_FILE = os.path.join(BASE_DIR, "lib", "test_data.json")
@@ -97,9 +100,9 @@ class TestModels(TestCase):
     def test_question_str(self):
         """Checks Question.__str__"""
         q1 = Question(title="OS", text="Favorite OS?")
-        self.assertEqual(str(q1), "OS")
+        self.assertEqual(text_type(q1), "OS")
         q2 = Question(text="Favorite food?")
-        self.assertEqual(str(q2), "Favorite food?")
+        self.assertEqual(text_type(q2), "Favorite food?")
 
     def test_question_to_dict(self):
         """Checks Question.to_dict"""
@@ -479,16 +482,16 @@ class TestApiViews(TestCase):
         response = self.client.get('/api/questions/')
         response_str = get_response_str(response)
         data = json.loads(response_str)
-        for (id, qdict) in data.items():
+        for (id, qdict) in six.iteritems(data):
             ques = Question.objects.get(id=id)
-            for (key, value) in qdict.items():
+            for (key, value) in six.iteritems(qdict):
                 self.assertEqual(qdict[key], getattr(ques, key))
 
     def test_options(self):
         response = self.client.get('/api/options/')
         response_str = get_response_str(response)
         data = json.loads(response_str)
-        for (id, odict) in data.items():
+        for (id, odict) in six.iteritems(data):
             option = Option.objects.get(id=id)
             self.assertEqual(odict["text"], option.text)
             self.assertEqual(odict["question"], option.question_id)

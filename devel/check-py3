@@ -1,0 +1,72 @@
+#!/bin/bash
+set -e
+
+echo; echo "Testing for additions of Python 2 patterns we've removed as part of moving towards Python 3 compatibility."; echo
+
+if [ -n "$(git status --porcelain)" ]; then
+    echo "The repository is not clean. check-py3 can only be run if the repository is clean."
+    echo "Displaying output from 'git status --porcelain' to help debug"
+    git status --porcelain
+    exit 1
+fi
+
+script_dir=$(dirname "$0")
+lister_path="$script_dir/lister.py"
+fixers_path="$script_dir/fixers.txt"
+python_files="$($lister_path -f py)"
+
+fixers="$(cat $fixers_path)"
+
+if [ -z "$python_files" ]; then
+    echo "There are no python files to check in the current directory."
+    exit 0
+fi
+
+quick=1
+if [ "$1" == "--find-fixers" ]; then
+    quick=0
+fi
+
+fixer_options=""
+for fixer in $fixers; do
+    fixer_options+="-f $fixer "
+done
+
+failed=0
+# run quick check
+echo "Running quick Python 3 compatibility test"
+echo "$python_files" | xargs futurize $fixer_options -j4 -n -w >/dev/null 2>/dev/null
+if ! git diff --exit-code; then
+    # Clear the output from this one
+    git reset --hard >/dev/null
+    failed=1
+fi
+
+# run slow check
+if [ "$failed" = "1" -a "$quick" == "0" ]; then
+    echo "Running each fixer separately to find out which fixers need to be applied"
+    for fixer in $fixers; do
+        echo "Running Python 3 compatibility test $fixer"
+        echo "$python_files" | xargs futurize -f $fixer -j4 -n -w >/dev/null 2>/dev/null
+        if ! git diff --exit-code; then
+            # Clear the output from this one
+            git reset --hard >/dev/null
+        fi
+    done
+fi
+
+echo "Check StringIO imports"
+if git grep -q '\(^\W*import StringIO\|^\W*from StringIO\)'; then
+    echo "ERROR: StringIO imports not compatible with python 2+3:"
+    git grep '\(^\W*import StringIO\|^\W*from StringIO\)'
+    echo "Please use 'from six.moves import cStringIO as StringIO'"
+    failed=1
+fi
+
+echo
+if [ "$failed" == "0" ]; then
+    echo "No issues detected!"
+else
+    echo "Python 3 compatibility error(s) detected!  See diffs above for what you need to change."
+    exit 1
+fi

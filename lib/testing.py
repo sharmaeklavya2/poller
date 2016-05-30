@@ -6,6 +6,7 @@ from django.http.request import QueryDict
 from django.core.serializers.json import DjangoJSONEncoder
 
 import json
+import six
 from six import text_type
 from base64 import b64encode
 try:
@@ -42,7 +43,7 @@ def encode_data(data, content_type=None):
             return ""
         elif isinstance(data, dict):
             form_data = QueryDict(mutable=True)
-            for key, value in data.items():
+            for key, value in six.iteritems(data):
                 if isinstance(value, collections_abc.Sequence) and not(isinstance(value, text_type)):
                     form_data.setlist(str(key), value)
                 else:

@@ -9,7 +9,6 @@ import sys
 if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
 
-import sys
 from collections import OrderedDict
 
 from six import text_type
