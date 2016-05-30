@@ -5,8 +5,8 @@ python:
   - 2.7
   - 3.4
 env:
-  - TEST_SUITE=scripts
-  - TEST_SUITE=backend
+  - TEST_SUITE=django
+  - TEST_SUITE=lint
 
 matrix:
   include:
@@ -14,6 +14,6 @@ matrix:
       env: TEST_SUITE=mypy
 
 install:
-  - devel/travis/pip_install.py
+  - devel/travis/setup-$TEST_SUITE
 script:
   - devel/travis/$TEST_SUITE

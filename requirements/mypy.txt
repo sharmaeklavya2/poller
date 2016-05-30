@@ -1,6 +1,2 @@
-Django
-six
-psycopg2
-typed-ast
-pyflakes
 git+https://github.com/python/mypy.git
+typed-ast

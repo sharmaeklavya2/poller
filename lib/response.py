@@ -13,7 +13,6 @@ def text_response(message, status=None):
 
 def json_response(object_to_send, status=None):
     json_str = json.dumps(object_to_send, indent=settings.JSON_INDENT, cls=DjangoJSONEncoder)
-    print(type(json_str))
     if not json_str.endswith("\n"):
         json_str += "\n" # type: ignore
     return HttpResponse(json_str, content_type="application/json", status=status)
