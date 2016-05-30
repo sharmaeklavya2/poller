@@ -4,7 +4,7 @@ from six import text_type
 try:
     import collections.abc as collections_abc
 except ImportError:
-    import collections as collections_abc
+    import collections as collections_abc # type: ignore # https://github.com/python/mypy/issues/1153
 
 from django.contrib.auth import authenticate
 

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+set -x
+
+devel/run-mypy
+devel/run-mypy --py2

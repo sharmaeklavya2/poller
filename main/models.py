@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 
+from six import text_type
 from collections import OrderedDict
+from typing import Any, Dict
 
 class Question(models.Model):
     serialize_order = ('title', 'text', 'multivote', 'locked', 'show_count')
@@ -17,7 +19,7 @@ class Question(models.Model):
         return self.title or self.text
 
     def to_dict(self):
-        qdict = OrderedDict()
+        qdict = OrderedDict() # type: Dict[text_type, Any]
         # add simple fields
         for attr in Question.serialize_order:
             qdict[attr] = getattr(self, attr)

@@ -60,5 +60,7 @@ Licensed under [GNU GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)
 
 ## Third party code
 
-* `devel/lister.py` - From [Zulip](https://github.com/zulip/zulip/)
-* `devel/lint_all.py` - From [Zulip](https://github.com/zulip/zulip/)
+* From [Zulip](https://github.com/zulip/zulip/):
+    * `devel/lister.py`
+    * `devel/lint_all.py`
+    * `devel/run-mypy`

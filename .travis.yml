@@ -8,7 +8,12 @@ env:
   - TEST_SUITE=scripts
   - TEST_SUITE=backend
 
+matrix:
+  include:
+    - python: 3.4
+      env: TEST_SUITE=mypy
+
 install:
-  - devel/travis/pip_install
+  - devel/travis/pip_install.py
 script:
   - devel/travis/$TEST_SUITE

@@ -11,7 +11,8 @@ from base64 import b64encode
 try:
     import collections.abc as collections_abc
 except ImportError:
-    import collections as collections_abc
+    import collections as collections_abc # type: ignore # https://github.com/python/mypy/issues/1153
+from typing import Any, Dict, List, Union
 
 from main.models import Option, Choice, Question
 from main.models import choose
@@ -77,7 +78,7 @@ def do_test_login(test, username, password, status_code1, status_code2, content_
     choose(user, linux)
 
     if as_dict:
-        login_data = {"username": username, "password": password}
+        login_data = {"username": username, "password": password} # type: Union[List[text_type], Dict[text_type, text_type]]
     else:
         login_data = [username, password]
     data = encode_data(login_data)

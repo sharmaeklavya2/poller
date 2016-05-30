@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import unicode_literals
 from __future__ import print_function
 
 import os
@@ -12,6 +11,9 @@ if BASE_DIR not in sys.path:
 
 import sys
 from collections import OrderedDict
+
+from six import text_type
+from typing import Dict
 
 # set up django
 print("Setting up Django", file=sys.stderr)
@@ -30,11 +32,11 @@ TEST_DATA_FILE = os.path.join(BASE_DIR, "lib", "test_data.json")
 
 endpoint_list = ["register", "login", "index", "questions", "options", "vote", "my_choices"]
 
-context_dict = OrderedDict()
+context_dict = OrderedDict() # type: Dict[str, text_type]
 for x in endpoint_list:
     context_dict["url_" + x] = reverse('api:' + x)
 
-SITE_URL = 'http://localhost:8000'
+SITE_URL = u'http://localhost:8000'
 
 for (k, v) in list(context_dict.items()):
     if k.startswith('url_'):
@@ -46,20 +48,20 @@ simple_urls = ('index', 'questions', 'options')
 for surl in simple_urls:
     context_dict['output_' + surl] = get_response_str(client.get(reverse('api:' + surl)))
 
-username = "api_example_username"
-password = "api_example_password"
+username = u"api_example_username"
+password = u"api_example_password"
 User.objects.filter(username=username).delete()
 user = User.objects.create_user(username=username, password=password)
 assert(client.login(username=username, password=password))
 
-vim = Option.objects.get(text="Vim")
-atom = Option.objects.get(text="Atom")
-linux = Option.objects.get(text="Linux")
+vim = Option.objects.get(text=u"Vim")
+atom = Option.objects.get(text=u"Atom")
+linux = Option.objects.get(text=u"Linux")
 choose(user, vim)
 choose(user, atom)
 choose(user, linux)
 
-context_dict["option_ids"] = [vim.id, atom.id, linux.id]
+context_dict["option_ids"] = text_type([vim.id, atom.id, linux.id])
 
 response = client.get('/api/my-choices/')
 assert(response.status_code == 200)
@@ -67,9 +69,9 @@ context_dict['output_my_choices'] = get_response_str(response)
 
 User.objects.filter(username=username).delete()
 
-context_dict['cookie'] = 'sessionid=csmdrzr8hisonw4uih5i3m1k70vhfprl'
+context_dict['cookie'] = u'sessionid=csmdrzr8hisonw4uih5i3m1k70vhfprl'
 
-context_dict['output_login'] = """
+context_dict['output_login'] = u"""
 HTTP/1.0 200 OK
 Date: Sun, 29 May 2016 16:39:38 GMT
 Server: WSGIServer/0.2 CPython/3.4.3+

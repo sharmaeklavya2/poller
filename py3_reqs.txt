@@ -1,6 +1,6 @@
 Django
 six
 psycopg2
-mypy-lang
 typed-ast
 pyflakes
+git+https://github.com/python/mypy.git

@@ -13,8 +13,11 @@ import traceback
 
 import lister
 
-exclude = []
-pyflakes_exclude = []
+from typing import Any, Dict, List, Tuple
+
+RuleList = List[Dict[str, Any]]
+
+exclude = [] # type: List[str]
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--full', action='store_true',
@@ -30,7 +33,7 @@ os.chdir(BASE_DIR)
 
 langs = ['py', 'sh', 'json', 'md', 'txt']
 by_lang = lister.list_files([], modified_only=args.modified,
-    use_shebang=True, ftypes=langs, group_by_ftype=True, exclude=exclude)
+    use_shebang=True, ftypes=langs, group_by_ftype=True, exclude=exclude) # type: Dict[str, List[str]]
 
 # Invoke the appropriate lint checker for each language,
 # and also check files for extra whitespace.
@@ -44,6 +47,7 @@ else:
     logger.setLevel(logging.WARNING)
 
 def check_pyflakes():
+    # type: () -> bool
     failed = False
     if not by_lang['py']:
         return failed
@@ -55,9 +59,10 @@ def check_pyflakes():
         ('typing', 'imported but unused',),
         ("'.local.*' imported but unused",),
         ("'.default.*' imported but unused",),
+        ("'six.text_type' imported but unused",),
         ("'from .local import *' used; unable to detect undefined names",),
         ("'from .default import *' used; unable to detect undefined names",),
-    ]
+    ] # type: List[Tuple[str, ...]]
     # pyflakes writes some output (like syntax errors) to stderr.
     for pipe in (pyflakes.stdout, pyflakes.stderr):
         for line in pipe:
@@ -72,6 +77,7 @@ def check_pyflakes():
     return failed
 
 def custom_check_file(fpath, rules):
+    # type: (str, RuleList) -> bool
     failed = False
     lineFlag = False
     for i, line in enumerate(open(fpath)):
@@ -103,11 +109,11 @@ whitespace_rules = [
      'strip': '\n',
      'exclude': set(),
      'description': 'Fix tab-based whitespace'},
-]
+] # type: RuleList
 
-rules = {}
+rules = {lang: whitespace_rules[:] for lang in langs} # type: Dict[str, RuleList]
 
-rules['py'] = [
+rules['py'] += [
     {'pattern': '".*"%\([a-z_].*\)?$',
      'description': 'Missing space around "%"'},
     {'pattern': "'.*'%\([a-z_].*\)?$",
@@ -131,18 +137,15 @@ rules['py'] = [
     # this rule.
     {'pattern': '% [a-zA-Z0-9_.]*\)?$',
      'description': 'Used % comprehension without a tuple'},
-] + whitespace_rules
+]
 
-rules['sh'] = [
+rules['sh'] += [
     {'pattern': '#!.*sh [-xe]',
      'description': 'Fix shebang line with proper call to /usr/bin/env for Bash path, change -x|-e switches to set -x|set -e'},
-] + whitespace_rules[0:1]
-
-rules['json'] = whitespace_rules
-rules['md'] = whitespace_rules
-rules['txt'] = whitespace_rules
+]
 
 def check_custom_checks():
+    # type: () -> bool
     failed = False
     for lang in langs:
         for fpath in by_lang[lang]:

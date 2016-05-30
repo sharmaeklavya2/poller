@@ -11,7 +11,9 @@ from collections import OrderedDict
 try:
     import collections.abc as collections_abc
 except ImportError:
-    import collections as collections_abc
+    import collections as collections_abc # type: ignore # https://github.com/python/mypy/issues/1153
+from six import text_type
+from typing import Any, Dict
 
 from main.models import Question, Option, Choice
 from main.models import choose, unchoose, all_ques_data, get_all_oids_set
@@ -30,9 +32,9 @@ def all_ques(request):
 
 @require_safe
 def questions(request):
-    qlist = OrderedDict()
+    qlist = OrderedDict() # type: Dict[int, Dict[text_type, Any]]
     for q in Question.objects.order_by('id'):
-        qdict = OrderedDict()
+        qdict = OrderedDict() # type: Dict[text_type, Any]
         for attr in Question.serialize_order:
             qdict[attr] = getattr(q, attr)
         qlist[q.id] = qdict
@@ -40,9 +42,9 @@ def questions(request):
 
 @require_safe
 def options(request):
-    olist = OrderedDict()
+    olist = OrderedDict() # type: Dict[int, Dict[text_type, Any]]
     for option in Option.objects.order_by('id'):
-        odict = OrderedDict()
+        odict = OrderedDict() # type: Dict[text_type, Dict[text_type, Any]]
         odict['question'] = option.question_id
         odict['text'] = option.text
         if option.question.show_count:
