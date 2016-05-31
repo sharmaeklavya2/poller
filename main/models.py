@@ -3,10 +3,11 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 
-from six import text_type
+from six import text_type, python_2_unicode_compatible
 from collections import OrderedDict
 from typing import Any, Dict
 
+@python_2_unicode_compatible
 class Question(models.Model):
     serialize_order = ('title', 'text', 'multivote', 'locked', 'show_count')
     title = models.CharField(max_length=30, blank=True)
@@ -30,6 +31,7 @@ class Question(models.Model):
         qdict["options"] = options
         return qdict
 
+@python_2_unicode_compatible
 class Option(models.Model):
     serialize_order = ('text', 'question_id')
     text = models.CharField(max_length=100)
@@ -44,6 +46,7 @@ class Option(models.Model):
     def vote_count(self):
         return Choice.objects.filter(option_id=self.id).count()
 
+@python_2_unicode_compatible
 class Choice(models.Model):
     user = models.ForeignKey(User)
     option = models.ForeignKey(Option)
