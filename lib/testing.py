@@ -79,9 +79,11 @@ def do_test_basic_auth(test, username, password, status_code, output=None, separ
     if output is not None:
         test.assertEqual(get_response_str(response), output)
 
-def do_test_login(test, username, password, status_code1, status_code2, content_type=None, output1=None, output2=None, as_dict=True):
-    # type: (TestCase, text_type, text_type, int, int, Optional[text_type], Optional[text_type], Optional[text_type], bool) -> None
-    user = User.objects.get(username='user1')
+def do_test_login(test, username, password, status_code1, status_code2, content_type=None, output1=None, output2=None, as_dict=True, login_username=None):
+    # type: (TestCase, text_type, text_type, int, int, Optional[text_type], Optional[text_type], Optional[text_type], bool, Optional[text_type]) -> None
+    if login_username is None:
+        login_username = username
+    user = User.objects.get(username=login_username)
     vim = Option.objects.get(text="Vim")
     linux = Option.objects.get(text="Linux")
     choose(user, vim)

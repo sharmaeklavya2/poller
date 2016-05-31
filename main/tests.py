@@ -1,3 +1,4 @@
+# coding: utf-8
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -15,7 +16,7 @@ from lib import populate
 from lib.exceptions import BadDataError
 from lib.response import get_response_str
 from lib.testing import encode_data, do_test_login, do_test_basic_auth, do_logout, do_test_register, do_test_vote
-from lib.textutil import force_text
+from lib.textutil import force_text, force_str
 
 from six import text_type
 
@@ -23,6 +24,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEST_DATA_FILE = os.path.join(BASE_DIR, "lib", "test_data.json")
 TEST_QLIST = json.load(open(TEST_DATA_FILE))
 FORM_CONTENT_TYPE = 'application/x-www-form-urlencoded'
+
+s_fav_fruit = "मनपसंद फल?"
+s_anaar = "अनार"
+s_lichi = "लीची"
+s_chikoo = "चीकू"
 
 class TestTesting(TestCase):
     def test_encode_empty_form1(self):
@@ -57,6 +63,8 @@ class TestTesting(TestCase):
         self.assertEqual(encode_data(d4), d4)
         d5 = {"values": [1, 2, 3], "username": "user1"}
         self.assertEqual(encode_data(d5), d5)
+        d6 = {"username": s_chikoo, "password": "pass1"}
+        self.assertEqual(encode_data(d6), d6)
 
     def test_encode_dict_form2(self):
         d1 = {"username": "user1", "password": "pass1"}
@@ -74,20 +82,32 @@ class TestTesting(TestCase):
         d5 = {"values": [1, 2], "username": "user1"}
         res5 = ('username=user1&values=1&values=2', 'values=1&values=2&username=user1')
         self.assertIn(encode_data(d5, FORM_CONTENT_TYPE), res5)
+        d6 = {"username": s_chikoo, "password": "pass1"}
+        res6 = ('username=%E0%A4%9A%E0%A5%80%E0%A4%95%E0%A5%82&password=pass1',
+                'password=pass1&username=%E0%A4%9A%E0%A5%80%E0%A4%95%E0%A5%82')
+        self.assertIn(encode_data(d6, FORM_CONTENT_TYPE), res6)
 
     def test_encode_dict_json(self):
         d1 = {"username": "user1", "password": "pass1"}
         res1 = force_text(json.dumps(d1))
         self.assertEqual(encode_data(d1, "application/json"), res1)
+        d2 = {"username": s_chikoo, "password": "pass1"}
+        res2 = force_text(json.dumps(d2))
+        self.assertEqual(encode_data(d2, "application/json"), res2)
 
     def test_encode_list_form1(self):
         l1 = ['a', 'b']
         self.assertEqual(encode_data(l1), l1)
+        l2 = [s_anaar, s_chikoo]
+        self.assertEqual(encode_data(l2), l2)
 
     def test_encode_list_form2(self):
         l1 = ['a', 'b']
         with self.assertRaises(BadDataError):
             encode_data(l1, FORM_CONTENT_TYPE)
+        l2 = [s_anaar, s_chikoo]
+        with self.assertRaises(BadDataError):
+            encode_data(l2, FORM_CONTENT_TYPE)
 
     def test_encode_list_json(self):
         l1 = ['a', 'b']
@@ -96,6 +116,9 @@ class TestTesting(TestCase):
         l2 = [1, 2]
         res2 = force_text(json.dumps(l2))
         self.assertEqual(encode_data(l2, "application/json"), res2)
+        l3 = [s_anaar, s_chikoo]
+        res3 = force_text(json.dumps(l3))
+        self.assertEqual(encode_data(l3, "application/json"), res3)
 
 class TestModels(TestCase):
     def test_question_str(self):
@@ -104,6 +127,10 @@ class TestModels(TestCase):
         self.assertEqual(text_type(q1), "OS")
         q2 = Question(text="Favorite food?")
         self.assertEqual(text_type(q2), "Favorite food?")
+        q3 = Question(text=s_fav_fruit)
+        self.assertEqual(text_type(q3), s_fav_fruit)
+        self.assertEqual(str(q3), force_str(s_fav_fruit))
+
 
     def test_question_to_dict(self):
         """Checks Question.to_dict"""
@@ -112,9 +139,11 @@ class TestModels(TestCase):
         o1 = Option(text="Linux", question=q)
         o2 = Option(text="Windows", question=q)
         o3 = Option(text="Mac", question=q)
+        o4 = Option(text=s_chikoo, question=q)
         o1.save()
         o2.save()
         o3.save()
+        o4.save()
 
         qdict = {
             "title": "OS",
@@ -122,7 +151,7 @@ class TestModels(TestCase):
             "multivote": False,
             "locked": False,
             "show_count": True,
-            "options": ["Linux", "Windows", "Mac"],
+            "options": ["Linux", "Windows", "Mac", s_chikoo],
         }
 
         self.assertEqual(q.to_dict(), qdict)
@@ -352,21 +381,34 @@ class TestAuth(TestCase):
         u2 = User.objects.create_user('user2', password='pass2')
         u2.is_active = False
         u2.save()
+        User.objects.create_user(s_anaar, password='pass1')
+        uc = User.objects.create_user(s_chikoo, password='pass2')
+        uc.is_active = False
+        uc.save()
         populate.add_qlist(TEST_QLIST)
 
     def test_basic_auth_success(self):
         do_test_basic_auth(self, 'user1', 'pass1', 200, "[]")
+        do_test_basic_auth(self, s_anaar, 'pass1', 200, "[]")
     def test_basic_auth_inactive(self):
         do_test_basic_auth(self, 'user2', 'pass2', 403, "inactive")
+        do_test_basic_auth(self, s_chikoo, 'pass2', 403, "inactive")
     def test_basic_auth_wrong_login(self):
         do_test_basic_auth(self, 'user1', 'pass2', 401, "wrong_login")
+        do_test_basic_auth(self, s_anaar, 'pass2', 401, "wrong_login")
     def test_basic_auth_bad_request(self):
         do_test_basic_auth(self, 'user1', 'pass1', 401, separator='**')
+        do_test_basic_auth(self, s_anaar, 'pass1', 401, separator='**')
 
     def test_login_success(self):
         do_test_login(self, 'user1', 'pass1', 200, 200, FORM_CONTENT_TYPE, 'success')
         do_logout(self)
         do_test_login(self, 'user1', 'pass1', 200, 200, 'application/json', 'success')
+        do_test_login(self, 'user1', 'pass1', 200, 200, output1='success')
+        do_logout(self)
+        do_test_login(self, s_anaar, 'pass1', 200, 200, FORM_CONTENT_TYPE, 'success')
+        do_logout(self)
+        do_test_login(self, s_anaar, 'pass1', 200, 200, 'application/json', 'success')
         do_test_login(self, 'user1', 'pass1', 200, 200, output1='success')
         do_logout(self)
 
@@ -376,6 +418,11 @@ class TestAuth(TestCase):
         do_test_login(self, 'user2', 'pass2', 200, 403, 'application/json', 'inactive', 'inactive')
         do_test_login(self, 'user2', 'pass2', 200, 403, output1='inactive', output2='inactive')
         do_logout(self)
+        do_test_login(self, s_chikoo, 'pass2', 200, 403, FORM_CONTENT_TYPE, 'inactive', 'inactive')
+        do_logout(self)
+        do_test_login(self, s_chikoo, 'pass2', 200, 403, 'application/json', 'inactive', 'inactive')
+        do_test_login(self, s_chikoo, 'pass2', 200, 403, output1='inactive', output2='inactive')
+        do_logout(self)
 
     def test_login_wrong(self):
         do_test_login(self, 'user1', 'pass2', 200, 401, FORM_CONTENT_TYPE, 'wrong_login', 'auth_missing')
@@ -383,32 +430,48 @@ class TestAuth(TestCase):
         do_test_login(self, 'user1', 'pass2', 200, 401, 'application/json', 'wrong_login', 'auth_missing')
         do_test_login(self, 'user1', 'pass2', 200, 401, output1='wrong_login', output2='auth_missing')
         do_logout(self)
+        do_test_login(self, s_anaar, 'pass2', 200, 401, FORM_CONTENT_TYPE, 'wrong_login', 'auth_missing')
+        do_logout(self)
+        do_test_login(self, s_anaar, 'pass2', 200, 401, 'application/json', 'wrong_login', 'auth_missing')
+        do_test_login(self, s_anaar, 'pass2', 200, 401, output1='wrong_login', output2='auth_missing')
+        do_logout(self)
 
     def test_invalid_format1(self):
-        do_test_login(self, 'user1', ['pass1'], 400, 401, "application/json", "invalid password format", 'auth_missing') # type: ignore # intentional type violation
-        do_test_login(self, ['user1'], 'pass1', 400, 401, "application/json", "invalid username format", 'auth_missing') # type: ignore # intentional type violation
+        do_test_login(self, 'user1', ['pass1'], 400, 401, # type: ignore # intentional type violation
+                      "application/json", "invalid password format", 'auth_missing')
+        do_test_login(self, ['user1'], 'pass1', 400, 401, # type: ignore # intentional type violation
+                      "application/json", "invalid username format", 'auth_missing', login_username='user1')
+        do_test_login(self, s_anaar, ['pass1'], 400, 401, # type: ignore # intentional type violation
+                      "application/json", "invalid password format", 'auth_missing')
+        do_test_login(self, [s_anaar], 'pass1', 400, 401, # type: ignore # intentional type violation
+                      "application/json", "invalid username format", 'auth_missing', login_username=s_anaar)
 
     def test_invalid_format2(self):
         do_test_login(self, 'user1', 'pass1', 400, 401, "application/json", "invalid data format", "auth_missing", as_dict=False)
+        do_test_login(self, s_anaar, 'pass1', 400, 401, "application/json", "invalid data format", "auth_missing", as_dict=False)
 
     def test_register_form1(self):
         do_test_register(self, 'user1', 'pass1', 200, "username_taken")
         do_test_register(self, 'user3', 'pass3', 200, "success")
-        do_test_register(self, 'user1', 'pass1', 200, "username_taken")
+        do_test_register(self, 'user3', 'pass1', 200, "username_taken")
+        do_test_register(self, s_anaar, 'pass1', 200, "username_taken")
 
     def test_disallow_register_form1(self):
         with self.settings(ALLOW_REG=False):
             do_test_register(self, 'user1', 'pass1', 403, "reg_closed")
+            do_test_register(self, s_anaar, 'pass1', 403, "reg_closed")
             do_test_register(self, 'user3', 'pass3', 403, "reg_closed")
 
     def test_disallow_register_json(self):
         with self.settings(ALLOW_REG=False):
             do_test_register(self, 'user1', 'pass1', 403, "reg_closed", "application/json")
+            do_test_register(self, s_anaar, 'pass1', 403, "reg_closed", "application/json")
             do_test_register(self, 'user3', 'pass3', 403, "reg_closed", "application/json")
 
     def test_disallow_register_form2(self):
         with self.settings(ALLOW_REG=False):
             do_test_register(self, 'user1', 'pass1', 403, "reg_closed", FORM_CONTENT_TYPE)
+            do_test_register(self, s_anaar, 'pass1', 403, "reg_closed", FORM_CONTENT_TYPE)
             do_test_register(self, 'user3', 'pass3', 403, "reg_closed", FORM_CONTENT_TYPE)
 
     def test_allow_register_form1(self):
@@ -416,18 +479,21 @@ class TestAuth(TestCase):
             do_test_register(self, 'user1', 'pass1', 200, "username_taken")
             do_test_register(self, 'user3', 'pass3', 200, "success")
             do_test_register(self, 'user3', 'pass3', 200, "username_taken")
+            do_test_register(self, s_anaar, 'pass1', 200, "username_taken")
 
     def test_allow_register_json(self):
         with self.settings(ALLOW_REG=True):
             do_test_register(self, 'user1', 'pass1', 200, "username_taken", "application/json")
             do_test_register(self, 'user3', 'pass3', 200, "success", "application/json")
             do_test_register(self, 'user3', 'pass3', 200, "username_taken", "application/json")
+            do_test_register(self, s_anaar, 'pass1', 200, "username_taken", "application/json")
 
     def test_allow_register_form2(self):
         with self.settings(ALLOW_REG=True):
             do_test_register(self, 'user1', 'pass1', 200, "username_taken", FORM_CONTENT_TYPE)
             do_test_register(self, 'user3', 'pass3', 200, "success", FORM_CONTENT_TYPE)
             do_test_register(self, 'user3', 'pass3', 200, "username_taken", FORM_CONTENT_TYPE)
+            do_test_register(self, s_anaar, 'pass1', 200, "username_taken", FORM_CONTENT_TYPE)
 
 class TestApiViews(TestCase):
     def setUp(self):
