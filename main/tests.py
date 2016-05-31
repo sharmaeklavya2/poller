@@ -385,8 +385,8 @@ class TestAuth(TestCase):
         do_logout(self)
 
     def test_invalid_format1(self):
-        do_test_login(self, 'user1', ['pass1'], 400, 401, "application/json", "invalid password format", 'auth_missing')
-        do_test_login(self, ['user1'], 'pass1', 400, 401, "application/json", "invalid username format", 'auth_missing')
+        do_test_login(self, 'user1', ['pass1'], 400, 401, "application/json", "invalid password format", 'auth_missing') # type: ignore # intentional type violation
+        do_test_login(self, ['user1'], 'pass1', 400, 401, "application/json", "invalid username format", 'auth_missing') # type: ignore # intentional type violation
 
     def test_invalid_format2(self):
         do_test_login(self, 'user1', 'pass1', 400, 401, "application/json", "invalid data format", "auth_missing", as_dict=False)

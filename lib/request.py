@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import json
 from base64 import b64decode
 from six import text_type
@@ -7,13 +9,18 @@ except ImportError:
     import collections as collections_abc # type: ignore # https://github.com/python/mypy/issues/1153
 
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from django.http import HttpRequest, HttpResponse
 
 from lib.exceptions import BadDataError, ContentTypeError
 from lib.response import text_response
 
+from typing import Any, Callable, Optional, Tuple
+
 FORM_CONTENT_TYPE = 'application/x-www-form-urlencoded'
 
 def get_user_from_auth_header(request):
+    # type: (HttpRequest) -> Tuple[Optional[User], text_type]
     """
     Possible auth status codes and their meanings:
     auth_missing: Authorization header is not present
@@ -49,8 +56,10 @@ def get_user_from_auth_header(request):
         return (user, "inactive")
 
 def api_login_required(function):
+    # type: (Callable[..., HttpResponse]) -> Callable[..., HttpResponse]
     # decorator similar to django's login_required
     def wrapped(request, *args, **kwargs):
+        # type: (HttpRequest, *Any, **Any) -> HttpResponse
         if request.user.is_authenticated():
             if request.user.is_active:
                 return function(request, *args, **kwargs)
@@ -67,9 +76,11 @@ def api_login_required(function):
     return wrapped
 
 def is_form_content_type(content_type):
+    # type: (text_type) -> bool
     return content_type.startswith(FORM_CONTENT_TYPE) or content_type.startswith('multipart/form-data;')
 
 def get_parsed_post_data(request):
+    # type: (HttpRequest) -> Any
     content_type = request.META["CONTENT_TYPE"]
     if is_form_content_type(content_type):
         return request.POST
@@ -86,6 +97,7 @@ def get_parsed_post_data(request):
         raise ContentTypeError(content_type)
 
 def get_username_and_password(request):
+    # type: (HttpRequest) -> Tuple[text_type, text_type]
     data = get_parsed_post_data(request)
     if not isinstance(data, collections_abc.Mapping):
         raise BadDataError("invalid data format")

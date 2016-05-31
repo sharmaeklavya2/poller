@@ -56,10 +56,7 @@ def check_pyflakes():
         universal_newlines = True)
 
     false_positives = [
-        ('typing', 'imported but unused',),
-        ("'.local.*' imported but unused",),
-        ("'.default.*' imported but unused",),
-        ("'six.text_type' imported but unused",),
+        ('imported but unused',),
         ("'from .local import *' used; unable to detect undefined names",),
         ("'from .default import *' used; unable to detect undefined names",),
     ] # type: List[Tuple[str, ...]]

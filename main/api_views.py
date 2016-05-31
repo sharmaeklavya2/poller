@@ -13,7 +13,6 @@ try:
 except ImportError:
     import collections as collections_abc # type: ignore # https://github.com/python/mypy/issues/1153
 from six import text_type
-from typing import Any, Dict
 
 from main.models import Question, Option, Choice
 from main.models import choose, unchoose, all_ques_data, get_all_oids_set
@@ -25,6 +24,9 @@ from lib.request import (
     get_username_and_password
 )
 
+from typing import Any, Dict
+from lib.id_types import QuestionId, OptionId
+
 @require_safe
 def all_ques(request):
     qlist = all_ques_data()
@@ -32,7 +34,7 @@ def all_ques(request):
 
 @require_safe
 def questions(request):
-    qlist = OrderedDict() # type: Dict[int, Dict[text_type, Any]]
+    qlist = OrderedDict() # type: Dict[QuestionId, Dict[text_type, Any]]
     for q in Question.objects.order_by('id'):
         qdict = OrderedDict() # type: Dict[text_type, Any]
         for attr in Question.serialize_order:
@@ -42,7 +44,7 @@ def questions(request):
 
 @require_safe
 def options(request):
-    olist = OrderedDict() # type: Dict[int, Dict[text_type, Any]]
+    olist = OrderedDict() # type: Dict[OptionId, Dict[text_type, Any]]
     for option in Option.objects.order_by('id'):
         odict = OrderedDict() # type: Dict[text_type, Dict[text_type, Any]]
         odict['question'] = option.question_id
@@ -116,8 +118,8 @@ def vote(request):
     invalid_format = text_response("invalid_format", 400)
     if is_form_content_type(content_type):
         try:
-            choose_list = [int(x) for x in data.getlist("choose")]
-            unchoose_list = [int(x) for x in data.getlist("unchoose")]
+            choose_list = [OptionId(x) for x in data.getlist("choose")]
+            unchoose_list = [OptionId(x) for x in data.getlist("unchoose")]
         except ValueError:
             return invalid_format
     elif content_type.startswith("application/json"):
@@ -130,9 +132,9 @@ def vote(request):
             unchoose_list = []
             for oid in olist:
                 if oid>0:
-                    choose_list.append(oid)
+                    choose_list.append(OptionId(oid))
                 elif oid<0:
-                    unchoose_list.append(-oid)
+                    unchoose_list.append(OptionId(-oid))
                 else:
                     return zero_warn_response
         elif isinstance(data, collections_abc.Mapping):

@@ -1,7 +1,5 @@
-from __future__ import unicode_literals
-
 from six import PY2, text_type, binary_type
-from typing import Union
+from typing import TypeVar, Union
 
 def force_text(s):
     # type: (Union[text_type, binary_type]) -> text_type
@@ -25,3 +23,5 @@ def force_str(s):
         return s.encode('utf-8')
     else:
         return s.decode('utf-8')
+
+TextType = TypeVar('TextType', text_type, str)
