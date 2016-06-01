@@ -13,7 +13,7 @@ import traceback
 
 import lister
 
-from typing import Any, Dict, List, Tuple
+from typing import cast, Any, Dict, List, Tuple
 
 RuleList = List[Dict[str, Any]]
 
@@ -32,8 +32,8 @@ BASE_DIR = dirname(dirname(abspath(__file__)))
 os.chdir(BASE_DIR)
 
 langs = ['py', 'sh', 'json', 'md', 'txt']
-by_lang = lister.list_files([], modified_only=args.modified,
-    use_shebang=True, ftypes=langs, group_by_ftype=True, exclude=exclude) # type: Dict[str, List[str]]
+by_lang = cast(Dict[str, List[str]], lister.list_files([], modified_only=args.modified,
+    use_shebang=True, ftypes=langs, group_by_ftype=True, exclude=exclude))
 
 # Invoke the appropriate lint checker for each language,
 # and also check files for extra whitespace.

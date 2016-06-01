@@ -3,5 +3,5 @@
 set -e
 set -x
 
-devel/run-mypy
-devel/run-mypy --py2
+devel/run_mypy.py
+devel/run_mypy.py --py2

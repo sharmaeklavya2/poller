@@ -11,7 +11,7 @@ import argparse
 import subprocess
 import six
 from six import text_type
-from typing import List
+from typing import cast, List
 
 exclude = [] # type: List[str]
 
@@ -28,18 +28,25 @@ args = parser.parse_args()
 if args.all:
     exclude = []
 
+py2arg = ["--py2"] if args.py2 else [] # type: List[str]
+lister_files = ['run_mypy.py', 'lint_all.py']
+exclude += [os.path.join('devel', f) for f in lister_files]
+
 # find all non-excluded files in current directory
 BASE_DIR = dirname(dirname(abspath(__file__)))
 exclude = [os.path.join(BASE_DIR, fpath) for fpath in exclude]
-python_files = lister.list_files(targets=args.targets, ftypes=['py'], use_shebang=True,
-                                 modified_only=args.modified, exclude=exclude)
+python_files = cast(List[str], lister.list_files(targets=args.targets, ftypes=['py'], use_shebang=True,
+                                 modified_only=args.modified, exclude=exclude))
 
 # run mypy
 if six.PY2:
     print("Warning: You're running python 2.")
 if python_files:
-    base_args = ['mypy', "--fast-parser", "--silent-imports", "--check-untyped-defs"]
-    rc = subprocess.call(base_args + (["--py2"] if args.py2 else []) + python_files)
-    sys.exit(rc)
+    os.environ["MYPYPATH"] = os.path.join(BASE_DIR, "stubs")
+    base_args = ['mypy', "--fast-parser", "--silent-import", "--disallow-untyped-defs"]
+    rc1 = subprocess.call(base_args + py2arg + python_files)
+    os.chdir('devel')
+    rc2 = subprocess.call(base_args + py2arg + lister_files)
+    sys.exit(rc1 or rc2)
 else:
     print("There are no files to run mypy on.")
