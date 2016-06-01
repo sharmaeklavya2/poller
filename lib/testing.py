@@ -11,10 +11,6 @@ import json
 import six
 from six import text_type
 from base64 import b64encode
-try:
-    import collections.abc as collections_abc
-except ImportError:
-    import collections as collections_abc # type: ignore # https://github.com/python/mypy/issues/1153
 
 from main.models import Option, Choice, Question
 from main.models import choose
@@ -50,7 +46,7 @@ def encode_data(data, content_type=None):
         elif isinstance(data, dict):
             form_data = QueryDict(mutable=True)
             for key, value in six.iteritems(data):
-                if isinstance(value, collections_abc.Sequence) and not(isinstance(value, text_type)):
+                if isinstance(value, Sequence) and not(isinstance(value, text_type)):
                     form_data.setlist(str(key), value)
                 else:
                     form_data[key] = value

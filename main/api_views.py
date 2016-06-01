@@ -6,12 +6,9 @@ from django.views.decorators.http import require_safe, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
+from django.http import HttpRequest, HttpResponse
 
 from collections import OrderedDict
-try:
-    import collections.abc as collections_abc
-except ImportError:
-    import collections as collections_abc # type: ignore # https://github.com/python/mypy/issues/1153
 from six import text_type
 
 from main.models import Question, Option, Choice
@@ -24,16 +21,18 @@ from lib.request import (
     get_username_and_password
 )
 
-from typing import Any, Dict
+from typing import Any, Dict, Mapping, Sequence
 from lib.id_types import QuestionId, OptionId
 
 @require_safe
 def all_ques(request):
+    # type: (HttpRequest) -> HttpResponse
     qlist = all_ques_data()
     return json_response(qlist)
 
 @require_safe
 def questions(request):
+    # type: (HttpRequest) -> HttpResponse
     qlist = OrderedDict() # type: Dict[QuestionId, Dict[text_type, Any]]
     for q in Question.objects.order_by('id'):
         qdict = OrderedDict() # type: Dict[text_type, Any]
@@ -44,6 +43,7 @@ def questions(request):
 
 @require_safe
 def options(request):
+    # type: (HttpRequest) -> HttpResponse
     olist = OrderedDict() # type: Dict[OptionId, Dict[text_type, Any]]
     for option in Option.objects.order_by('id'):
         odict = OrderedDict() # type: Dict[text_type, Dict[text_type, Any]]
@@ -59,6 +59,7 @@ def options(request):
 @require_POST
 @csrf_exempt
 def login_view(request):
+    # type: (HttpRequest) -> HttpResponse
     try:
         username, password = get_username_and_password(request)
     except BadDataError as e:
@@ -77,6 +78,7 @@ def login_view(request):
 @require_POST
 @csrf_exempt
 def register(request):
+    # type: (HttpRequest) -> HttpResponse
     if not(hasattr(settings, 'ALLOW_REG') and settings.ALLOW_REG):
         return text_response("reg_closed", 403)
 
@@ -96,12 +98,14 @@ def register(request):
 @require_POST
 @csrf_exempt
 def logout_view(request):
+    # type: (HttpRequest) -> HttpResponse
     logout(request)
     return text_response("logged_out")
 
 @require_safe
 @api_login_required
 def my_choices(request):
+    # type: (HttpRequest) -> HttpResponse
     choice_query = Choice.objects.filter(user=request.user).order_by('option_id')
     return json_response(list(choice_query.values_list('option_id', flat=True)))
 
@@ -109,6 +113,8 @@ def my_choices(request):
 @csrf_exempt
 @api_login_required
 def vote(request):
+    # type: (HttpRequest) -> HttpResponse
+
     # parse data
     if not request.body:
         return text_response("")
@@ -123,7 +129,7 @@ def vote(request):
         except ValueError:
             return invalid_format
     elif content_type.startswith("application/json"):
-        if isinstance(data, collections_abc.Sequence):
+        if isinstance(data, Sequence):
             try:
                 olist = [int(x) for x in data]
             except ValueError:
@@ -137,10 +143,10 @@ def vote(request):
                     unchoose_list.append(OptionId(-oid))
                 else:
                     return zero_warn_response
-        elif isinstance(data, collections_abc.Mapping):
+        elif isinstance(data, Mapping):
             choose_list = data.get("choose", [])
             unchoose_list = data.get("unchoose", [])
-            if not (isinstance(choose_list, collections_abc.Sequence) and isinstance(unchoose_list, collections_abc.Iterable)):
+            if not (isinstance(choose_list, Sequence) and isinstance(unchoose_list, Sequence)):
                 return invalid_format
         else:
             return invalid_format

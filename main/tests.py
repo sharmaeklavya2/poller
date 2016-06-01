@@ -32,12 +32,14 @@ s_chikoo = "चीकू"
 
 class TestTesting(TestCase):
     def test_encode_empty_form1(self):
+        # type: () -> None
         self.assertEqual(encode_data(None), {})
         self.assertEqual(encode_data(""), "")
         self.assertEqual(encode_data([]), [])
         self.assertEqual(encode_data({}), {})
 
     def test_encode_empty_form2(self):
+        # type: () -> None
         self.assertEqual(encode_data(None, FORM_CONTENT_TYPE), "")
         self.assertEqual(encode_data({}, FORM_CONTENT_TYPE), "")
         self.assertEqual(encode_data("", FORM_CONTENT_TYPE), "")
@@ -45,6 +47,7 @@ class TestTesting(TestCase):
             encode_data([], FORM_CONTENT_TYPE)
 
     def test_encode_empty_json(self):
+        # type: () -> None
         with self.assertRaises(BadDataError):
             encode_data(None, "application/json")
         self.assertEqual(encode_data("", "application/json"), '""')
@@ -53,6 +56,7 @@ class TestTesting(TestCase):
         self.assertEqual(encode_data({}, "application/json"), '{}')
 
     def test_encode_dict_form1(self):
+        # type: () -> None
         d1 = {"username": "user1", "password": "pass1"}
         self.assertEqual(encode_data(d1), d1)
         d2 = {"values": ["a", "b", "c"]}
@@ -67,6 +71,7 @@ class TestTesting(TestCase):
         self.assertEqual(encode_data(d6), d6)
 
     def test_encode_dict_form2(self):
+        # type: () -> None
         d1 = {"username": "user1", "password": "pass1"}
         res1 = ('username=user1&password=pass1', 'password=pass1&username=user1')
         self.assertIn(encode_data(d1, FORM_CONTENT_TYPE), res1)
@@ -88,6 +93,7 @@ class TestTesting(TestCase):
         self.assertIn(encode_data(d6, FORM_CONTENT_TYPE), res6)
 
     def test_encode_dict_json(self):
+        # type: () -> None
         d1 = {"username": "user1", "password": "pass1"}
         res1 = force_text(json.dumps(d1))
         self.assertEqual(encode_data(d1, "application/json"), res1)
@@ -96,12 +102,14 @@ class TestTesting(TestCase):
         self.assertEqual(encode_data(d2, "application/json"), res2)
 
     def test_encode_list_form1(self):
+        # type: () -> None
         l1 = ['a', 'b']
         self.assertEqual(encode_data(l1), l1)
         l2 = [s_anaar, s_chikoo]
         self.assertEqual(encode_data(l2), l2)
 
     def test_encode_list_form2(self):
+        # type: () -> None
         l1 = ['a', 'b']
         with self.assertRaises(BadDataError):
             encode_data(l1, FORM_CONTENT_TYPE)
@@ -110,6 +118,7 @@ class TestTesting(TestCase):
             encode_data(l2, FORM_CONTENT_TYPE)
 
     def test_encode_list_json(self):
+        # type: () -> None
         l1 = ['a', 'b']
         res1 = force_text(json.dumps(l1))
         self.assertEqual(encode_data(l1, "application/json"), res1)
@@ -122,6 +131,7 @@ class TestTesting(TestCase):
 
 class TestModels(TestCase):
     def test_question_str(self):
+        # type: () -> None
         """Checks Question.__str__"""
         q1 = Question(title="OS", text="Favorite OS?")
         self.assertEqual(text_type(q1), "OS")
@@ -133,6 +143,7 @@ class TestModels(TestCase):
 
 
     def test_question_to_dict(self):
+        # type: () -> None
         """Checks Question.to_dict"""
         q = Question(title="OS", text="Favorite OS?", multivote=False, locked=False, show_count=True)
         q.save()
@@ -158,17 +169,20 @@ class TestModels(TestCase):
 
 class TestChoosing(TestCase):
     def setUp(self):
+        # type: () -> None
         User.objects.create_user('user1')
         User.objects.create_user('user2')
         populate.add_qlist(TEST_QLIST)
 
     def test_empty(self):
+        # type: () -> None
         choices = Choice.objects.all()
         self.assertEqual(choices.count(), 0)
         for option in Option.objects.all():
             self.assertEqual(option.vote_count(), 0)
 
     def test_simple_choose(self):
+        # type: () -> None
         u1 = User.objects.get(username='user1')
         u2 = User.objects.get(username='user2')
         qed = Question.objects.get(title="Text Editor")
@@ -201,6 +215,7 @@ class TestChoosing(TestCase):
         self.assertEqual(linux.vote_count(), 2)
 
     def test_separate_choose(self):
+        # type: () -> None
         user = User.objects.get(username='user1')
         qed = Question.objects.get(title="Text Editor")
         qos = Question.objects.get(title="Operating System")
@@ -229,6 +244,7 @@ class TestChoosing(TestCase):
         self.assertEqual(os_choices2[0].option_id, linux.id)
 
     def test_same_choose(self):
+        # type: () -> None
         user = User.objects.get(username='user1')
         qed = Question.objects.get(title="Text Editor")
         qos = Question.objects.get(title="Operating System")
@@ -254,6 +270,7 @@ class TestChoosing(TestCase):
         self.assertEqual(os_choices2.first().option_id, linux.id)
 
     def test_unchoose_empty(self):
+        # type: () -> None
         user = User.objects.get(username='user1')
         qed = Question.objects.get(title="Text Editor")
         qos = Question.objects.get(title="Operating System")
@@ -269,6 +286,7 @@ class TestChoosing(TestCase):
         self.assertEqual(linux.vote_count(), 0)
 
     def test_unchoose_chosen(self):
+        # type: () -> None
         u1 = User.objects.get(username='user1')
         u2 = User.objects.get(username='user2')
         qed = Question.objects.get(title="Text Editor")
@@ -297,6 +315,7 @@ class TestChoosing(TestCase):
         self.assertEqual(linux.vote_count(), 1)
 
     def test_unchoose_other(self):
+        # type: () -> None
         u1 = User.objects.get(username='user1')
         u2 = User.objects.get(username='user2')
         qed = Question.objects.get(title="Text Editor")
@@ -332,6 +351,7 @@ class TestChoosing(TestCase):
         self.assertEqual(atom.vote_count(), 1)
 
     def test_locked(self):
+        # type: () -> None
         user = User.objects.get(username='user1')
         qed = Question.objects.get(title="Text Editor")
         qos = Question.objects.get(title="Operating System")
@@ -377,6 +397,7 @@ class TestChoosing(TestCase):
 
 class TestAuth(TestCase):
     def setUp(self):
+        # type: () -> None
         User.objects.create_user('user1', password='pass1')
         u2 = User.objects.create_user('user2', password='pass2')
         u2.is_active = False
@@ -388,19 +409,24 @@ class TestAuth(TestCase):
         populate.add_qlist(TEST_QLIST)
 
     def test_basic_auth_success(self):
+        # type: () -> None
         do_test_basic_auth(self, 'user1', 'pass1', 200, "[]")
         do_test_basic_auth(self, s_anaar, 'pass1', 200, "[]")
     def test_basic_auth_inactive(self):
+        # type: () -> None
         do_test_basic_auth(self, 'user2', 'pass2', 403, "inactive")
         do_test_basic_auth(self, s_chikoo, 'pass2', 403, "inactive")
     def test_basic_auth_wrong_login(self):
+        # type: () -> None
         do_test_basic_auth(self, 'user1', 'pass2', 401, "wrong_login")
         do_test_basic_auth(self, s_anaar, 'pass2', 401, "wrong_login")
     def test_basic_auth_bad_request(self):
+        # type: () -> None
         do_test_basic_auth(self, 'user1', 'pass1', 401, separator='**')
         do_test_basic_auth(self, s_anaar, 'pass1', 401, separator='**')
 
     def test_login_success(self):
+        # type: () -> None
         do_test_login(self, 'user1', 'pass1', 200, 200, FORM_CONTENT_TYPE, 'success')
         do_logout(self)
         do_test_login(self, 'user1', 'pass1', 200, 200, 'application/json', 'success')
@@ -413,6 +439,7 @@ class TestAuth(TestCase):
         do_logout(self)
 
     def test_login_inactive(self):
+        # type: () -> None
         do_test_login(self, 'user2', 'pass2', 200, 403, FORM_CONTENT_TYPE, 'inactive', 'inactive')
         do_logout(self)
         do_test_login(self, 'user2', 'pass2', 200, 403, 'application/json', 'inactive', 'inactive')
@@ -425,6 +452,7 @@ class TestAuth(TestCase):
         do_logout(self)
 
     def test_login_wrong(self):
+        # type: () -> None
         do_test_login(self, 'user1', 'pass2', 200, 401, FORM_CONTENT_TYPE, 'wrong_login', 'auth_missing')
         do_logout(self)
         do_test_login(self, 'user1', 'pass2', 200, 401, 'application/json', 'wrong_login', 'auth_missing')
@@ -437,6 +465,7 @@ class TestAuth(TestCase):
         do_logout(self)
 
     def test_invalid_format1(self):
+        # type: () -> None
         do_test_login(self, 'user1', ['pass1'], 400, 401, # type: ignore # intentional type violation
                       "application/json", "invalid password format", 'auth_missing')
         do_test_login(self, ['user1'], 'pass1', 400, 401, # type: ignore # intentional type violation
@@ -447,34 +476,40 @@ class TestAuth(TestCase):
                       "application/json", "invalid username format", 'auth_missing', login_username=s_anaar)
 
     def test_invalid_format2(self):
+        # type: () -> None
         do_test_login(self, 'user1', 'pass1', 400, 401, "application/json", "invalid data format", "auth_missing", as_dict=False)
         do_test_login(self, s_anaar, 'pass1', 400, 401, "application/json", "invalid data format", "auth_missing", as_dict=False)
 
     def test_register_form1(self):
+        # type: () -> None
         do_test_register(self, 'user1', 'pass1', 200, "username_taken")
         do_test_register(self, 'user3', 'pass3', 200, "success")
         do_test_register(self, 'user3', 'pass1', 200, "username_taken")
         do_test_register(self, s_anaar, 'pass1', 200, "username_taken")
 
     def test_disallow_register_form1(self):
+        # type: () -> None
         with self.settings(ALLOW_REG=False):
             do_test_register(self, 'user1', 'pass1', 403, "reg_closed")
             do_test_register(self, s_anaar, 'pass1', 403, "reg_closed")
             do_test_register(self, 'user3', 'pass3', 403, "reg_closed")
 
     def test_disallow_register_json(self):
+        # type: () -> None
         with self.settings(ALLOW_REG=False):
             do_test_register(self, 'user1', 'pass1', 403, "reg_closed", "application/json")
             do_test_register(self, s_anaar, 'pass1', 403, "reg_closed", "application/json")
             do_test_register(self, 'user3', 'pass3', 403, "reg_closed", "application/json")
 
     def test_disallow_register_form2(self):
+        # type: () -> None
         with self.settings(ALLOW_REG=False):
             do_test_register(self, 'user1', 'pass1', 403, "reg_closed", FORM_CONTENT_TYPE)
             do_test_register(self, s_anaar, 'pass1', 403, "reg_closed", FORM_CONTENT_TYPE)
             do_test_register(self, 'user3', 'pass3', 403, "reg_closed", FORM_CONTENT_TYPE)
 
     def test_allow_register_form1(self):
+        # type: () -> None
         with self.settings(ALLOW_REG=True):
             do_test_register(self, 'user1', 'pass1', 200, "username_taken")
             do_test_register(self, 'user3', 'pass3', 200, "success")
@@ -482,6 +517,7 @@ class TestAuth(TestCase):
             do_test_register(self, s_anaar, 'pass1', 200, "username_taken")
 
     def test_allow_register_json(self):
+        # type: () -> None
         with self.settings(ALLOW_REG=True):
             do_test_register(self, 'user1', 'pass1', 200, "username_taken", "application/json")
             do_test_register(self, 'user3', 'pass3', 200, "success", "application/json")
@@ -489,6 +525,7 @@ class TestAuth(TestCase):
             do_test_register(self, s_anaar, 'pass1', 200, "username_taken", "application/json")
 
     def test_allow_register_form2(self):
+        # type: () -> None
         with self.settings(ALLOW_REG=True):
             do_test_register(self, 'user1', 'pass1', 200, "username_taken", FORM_CONTENT_TYPE)
             do_test_register(self, 'user3', 'pass3', 200, "success", FORM_CONTENT_TYPE)
@@ -497,23 +534,27 @@ class TestAuth(TestCase):
 
 class TestApiViews(TestCase):
     def setUp(self):
+        # type: () -> None
         User.objects.create_user('user1', password='pass1')
         User.objects.create_user('user2', password='pass2')
         User.objects.create_user('user3', password='pass3')
         populate.add_qlist(TEST_QLIST)
 
     def test_all_ques(self):
+        # type: () -> None
         response = self.client.get('/api/')
         response_dict = json.loads(get_response_str(response))
         file_dict = json.load(open(TEST_DATA_FILE))
         self.assertEqual(response_dict, file_dict)
 
     def test_my_choices_unauthed(self):
+        # type: () -> None
         response = self.client.get('/api/my-choices/')
         self.assertEqual(response.status_code, 401)
         self.assertEqual(get_response_str(response), 'auth_missing')
 
     def test_my_choices_empty(self):
+        # type: () -> None
         user = User.objects.get(username='user1')
         self.client.force_login(user)
         response = self.client.get('/api/my-choices/')
@@ -522,6 +563,7 @@ class TestApiViews(TestCase):
         self.assertEqual(choices, [])
 
     def test_my_choices_one(self):
+        # type: () -> None
         user = User.objects.get(username='user1')
         vim = Option.objects.get(text="Vim")
         choose(user, vim)
@@ -533,6 +575,7 @@ class TestApiViews(TestCase):
         self.assertEqual(choices, [vim.id])
 
     def test_my_choices_many(self):
+        # type: () -> None
         user = User.objects.get(username='user1')
         vim = Option.objects.get(text="Vim")
         linux = Option.objects.get(text="Linux")
@@ -546,6 +589,7 @@ class TestApiViews(TestCase):
         self.assertEqual(choices, sorted([vim.id, linux.id]))
 
     def test_questions(self):
+        # type: () -> None
         response = self.client.get('/api/questions/')
         response_str = get_response_str(response)
         data = json.loads(response_str)
@@ -555,6 +599,7 @@ class TestApiViews(TestCase):
                 self.assertEqual(qdict[key], getattr(ques, key))
 
     def test_options(self):
+        # type: () -> None
         response = self.client.get('/api/options/')
         response_str = get_response_str(response)
         data = json.loads(response_str)
@@ -569,6 +614,7 @@ class TestApiViews(TestCase):
                 self.assertIsNone(odict["count"])
 
     def test_vote_form_empty(self):
+        # type: () -> None
         do_test_vote(self, "user1", None, None, None, 200, [])
         do_test_vote(self, "user2", None, None, None, 200, [], "application/json")
         do_test_vote(self, "user3", None, None, None, 200, [], FORM_CONTENT_TYPE)
@@ -576,43 +622,54 @@ class TestApiViews(TestCase):
         do_test_vote(self, "user2", None, None, None, 200, [], FORM_CONTENT_TYPE + ";")
 
     def test_vote_choose_only(self):
+        # type: () -> None
         do_test_vote(self, "user1", ["Vim", "Windows"], ["Vim", "Linux"], None, 200, ["Vim", "Linux"])
         do_test_vote(self, "user2", ["Vim", "Windows"], ["Vim", "Linux"], None, 200, ["Vim", "Linux"], "application/json")
         do_test_vote(self, "user3", ["Vim", "Windows"], ["Vim", "Linux"], None, 200, ["Vim", "Linux"], FORM_CONTENT_TYPE)
 
     def test_vote_unchoose_only(self):
+        # type: () -> None
         do_test_vote(self, "user1", ["Vim", "Atom"], None, ["Vim", "Linux"], 200, ["Atom"])
         do_test_vote(self, "user2", ["Vim", "Atom"], None, ["Vim", "Linux"], 200, ["Atom"], "application/json")
         do_test_vote(self, "user3", ["Vim", "Atom"], None, ["Vim", "Linux"], 200, ["Atom"], FORM_CONTENT_TYPE)
 
     def test_vote_both(self):
+        # type: () -> None
         do_test_vote(self, "user1", ["Vim", "Sublime"], ["Atom"], ["Sublime"], 200, ["Vim", "Atom"])
         do_test_vote(self, "user2", ["Vim", "Sublime"], ["Atom"], ["Sublime"], 200, ["Vim", "Atom"], "application/json")
         do_test_vote(self, "user3", ["Vim", "Sublime"], ["Atom"], ["Sublime"], 200, ["Vim", "Atom"], FORM_CONTENT_TYPE)
 
     def test_vote_inboth(self):
+        # type: () -> None
         do_test_vote(self, "user1", ["Vim", "Sublime"], ["Vim", "Atom"], ["Vim"], 400, ["Vim", "Sublime"])
         do_test_vote(self, "user2", ["Vim", "Sublime"], ["Vim", "Atom"], ["Vim"], 400, ["Vim", "Sublime"], "application/json")
         do_test_vote(self, "user3", ["Vim", "Sublime"], ["Vim", "Atom"], ["Vim"], 400, ["Vim", "Sublime"], FORM_CONTENT_TYPE)
 
     def test_vote_num_choose_only(self):
+        # type: () -> None
         do_test_vote(self, "user1", ["Vim", "Windows"], ["Vim", "Linux"], None, 200, ["Vim", "Linux"], "application/json", True)
 
     def test_vote_num_unchoose_only(self):
+        # type: () -> None
         do_test_vote(self, "user1", ["Vim", "Atom"], None, ["Vim", "Linux"], 200, ["Atom"], "application/json", True)
 
     def test_vote_num_both(self):
+        # type: () -> None
         do_test_vote(self, "user2", ["Vim", "Sublime"], ["Atom"], ["Sublime"], 200, ["Vim", "Atom"], "application/json", True)
 
     def test_vote_num_inboth(self):
+        # type: () -> None
         do_test_vote(self, "user2", ["Vim", "Sublime"], ["Vim", "Atom"], ["Vim"], 400, ["Vim", "Sublime"], "application/json", True)
 
     def test_vote_locked_form1(self):
+        # type: () -> None
         do_test_vote(self, "user1", ["Vim", "Sublime", "Windows"], ["Atom", "Linux"], ["Sublime"],
                      200, ["Vim", "Sublime", "Linux"], locked_titles=["Text Editor"])
     def test_vote_locked_json(self):
+        # type: () -> None
         do_test_vote(self, "user2", ["Vim", "Sublime", "Windows"], ["Atom", "Linux"], ["Sublime"],
                      200, ["Vim", "Sublime", "Linux"], "application/json", locked_titles=["Text Editor"])
     def test_vote_locked_form2(self):
+        # type: () -> None
         do_test_vote(self, "user3", ["Vim", "Sublime", "Windows"], ["Atom", "Linux"], ["Sublime"],
                      200, ["Vim", "Sublime", "Linux"], FORM_CONTENT_TYPE, locked_titles=["Text Editor"])

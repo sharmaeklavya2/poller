@@ -3,10 +3,6 @@ from __future__ import unicode_literals
 import json
 from base64 import b64decode
 from six import text_type
-try:
-    import collections.abc as collections_abc
-except ImportError:
-    import collections as collections_abc # type: ignore # https://github.com/python/mypy/issues/1153
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -15,7 +11,7 @@ from django.http import HttpRequest, HttpResponse
 from lib.exceptions import BadDataError, ContentTypeError
 from lib.response import text_response
 
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Mapping, Optional, Tuple
 
 FORM_CONTENT_TYPE = 'application/x-www-form-urlencoded'
 
@@ -99,7 +95,7 @@ def get_parsed_post_data(request):
 def get_username_and_password(request):
     # type: (HttpRequest) -> Tuple[text_type, text_type]
     data = get_parsed_post_data(request)
-    if not isinstance(data, collections_abc.Mapping):
+    if not isinstance(data, Mapping):
         raise BadDataError("invalid data format")
     username = data.get('username', None)
     password = data.get('password', None)
