@@ -13,7 +13,7 @@ from six import text_type
 from base64 import b64encode
 
 from main.models import Option, Choice, Question
-from main.models import choose
+from lib.actions import choose
 
 from lib.exceptions import BadDataError, ContentTypeError
 from lib.response import get_response_str

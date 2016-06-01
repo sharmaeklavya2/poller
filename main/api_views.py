@@ -12,7 +12,8 @@ from collections import OrderedDict
 from six import text_type
 
 from main.models import Question, Option, Choice
-from main.models import choose, unchoose, all_ques_data, get_all_oids_set
+from lib.actions import choose, unchoose
+from lib.models import vote_count, all_ques_data, get_all_oids_set
 
 from lib.exceptions import BadDataError
 from lib.response import json_response, text_response
@@ -50,7 +51,7 @@ def options(request):
         odict['question'] = option.question_id
         odict['text'] = option.text
         if option.question.show_count:
-            odict['count'] = option.vote_count()
+            odict['count'] = vote_count(option)
         else:
             odict['count'] = None
         olist[option.id] = odict

@@ -10,7 +10,8 @@ import json
 import six
 
 from main.models import Question, Option, Choice
-from main.models import choose, unchoose
+from lib.actions import choose, unchoose
+from lib.models import vote_count, question_to_dict
 
 from lib import populate
 from lib.exceptions import BadDataError
@@ -144,7 +145,6 @@ class TestModels(TestCase):
 
     def test_question_to_dict(self):
         # type: () -> None
-        """Checks Question.to_dict"""
         q = Question(title="OS", text="Favorite OS?", multivote=False, locked=False, show_count=True)
         q.save()
         o1 = Option(text="Linux", question=q)
@@ -165,7 +165,7 @@ class TestModels(TestCase):
             "options": ["Linux", "Windows", "Mac", s_chikoo],
         }
 
-        self.assertEqual(q.to_dict(), qdict)
+        self.assertEqual(question_to_dict(q), qdict)
 
 class TestChoosing(TestCase):
     def setUp(self):
@@ -179,7 +179,7 @@ class TestChoosing(TestCase):
         choices = Choice.objects.all()
         self.assertEqual(choices.count(), 0)
         for option in Option.objects.all():
-            self.assertEqual(option.vote_count(), 0)
+            self.assertEqual(vote_count(option), 0)
 
     def test_simple_choose(self):
         # type: () -> None
@@ -210,9 +210,9 @@ class TestChoosing(TestCase):
         self.assertEqual(os_choices1.first().option_id, linux.id)
         self.assertEqual(os_choices2.first().option_id, linux.id)
 
-        self.assertEqual(vim.vote_count(), 1)
-        self.assertEqual(atom.vote_count(), 1)
-        self.assertEqual(linux.vote_count(), 2)
+        self.assertEqual(vote_count(vim), 1)
+        self.assertEqual(vote_count(atom), 1)
+        self.assertEqual(vote_count(linux), 2)
 
     def test_separate_choose(self):
         # type: () -> None
@@ -282,8 +282,8 @@ class TestChoosing(TestCase):
         self.assertEqual(Choice.objects.filter(user=user, option__question=qed).count(), 0)
         self.assertEqual(Choice.objects.filter(user=user, option__question=qos).count(), 0)
 
-        self.assertEqual(vim.vote_count(), 0)
-        self.assertEqual(linux.vote_count(), 0)
+        self.assertEqual(vote_count(vim), 0)
+        self.assertEqual(vote_count(linux), 0)
 
     def test_unchoose_chosen(self):
         # type: () -> None
@@ -311,8 +311,8 @@ class TestChoosing(TestCase):
         self.assertEqual(ed_choices2[0].option_id, vim.id)
         self.assertEqual(os_choices2[0].option_id, linux.id)
 
-        self.assertEqual(vim.vote_count(), 1)
-        self.assertEqual(linux.vote_count(), 1)
+        self.assertEqual(vote_count(vim), 1)
+        self.assertEqual(vote_count(linux), 1)
 
     def test_unchoose_other(self):
         # type: () -> None
@@ -346,9 +346,9 @@ class TestChoosing(TestCase):
         self.assertEqual(ed_choices2[1].option_id, atom.id)
         self.assertEqual(os_choices2[0].option_id, linux.id)
 
-        self.assertEqual(vim.vote_count(), 2)
-        self.assertEqual(linux.vote_count(), 2)
-        self.assertEqual(atom.vote_count(), 1)
+        self.assertEqual(vote_count(vim), 2)
+        self.assertEqual(vote_count(linux), 2)
+        self.assertEqual(vote_count(atom), 1)
 
     def test_locked(self):
         # type: () -> None
@@ -389,11 +389,11 @@ class TestChoosing(TestCase):
         self.assertEqual(ed_choices[1].option_id, atom.id)
         self.assertEqual(os_choices[0].option_id, linux.id)
 
-        self.assertEqual(vim.vote_count(), 1)
-        self.assertEqual(linux.vote_count(), 1)
-        self.assertEqual(atom.vote_count(), 1)
-        self.assertEqual(sublime.vote_count(), 0)
-        self.assertEqual(windows.vote_count(), 0)
+        self.assertEqual(vote_count(vim), 1)
+        self.assertEqual(vote_count(linux), 1)
+        self.assertEqual(vote_count(atom), 1)
+        self.assertEqual(vote_count(sublime), 0)
+        self.assertEqual(vote_count(windows), 0)
 
 class TestAuth(TestCase):
     def setUp(self):
@@ -608,7 +608,7 @@ class TestApiViews(TestCase):
             self.assertEqual(odict["text"], option.text)
             self.assertEqual(odict["question"], option.question_id)
             if option.question.show_count:
-                self.assertEqual(odict["count"], option.vote_count())
+                self.assertEqual(odict["count"], vote_count(option))
                 self.assertEqual(odict["count"], 0)
             else:
                 self.assertIsNone(odict["count"])

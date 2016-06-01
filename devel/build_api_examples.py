@@ -24,7 +24,8 @@ from django.test import Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
-from main.models import Option, choose
+from main.models import Option
+from lib.actions import choose
 from lib.response import get_response_str
 
 TEST_DATA_FILE = os.path.join(BASE_DIR, "lib", "test_data.json")
