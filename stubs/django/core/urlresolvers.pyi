@@ -1,0 +1,3 @@
+from six import text_type
+
+def reverse(x: text_type) -> text_type: ...

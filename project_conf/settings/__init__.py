@@ -97,6 +97,6 @@ else:
 # Import local settings
 
 try:
-    from .local import *
+    from .local import * # type: ignore
 except ImportError:
     from .default import *

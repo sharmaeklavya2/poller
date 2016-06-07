@@ -47,7 +47,7 @@ def options(request):
     # type: (HttpRequest) -> HttpResponse
     olist = OrderedDict() # type: Dict[OptionId, Dict[text_type, Any]]
     for option in Option.objects.order_by('id'):
-        odict = OrderedDict() # type: Dict[text_type, Dict[text_type, Any]]
+        odict = OrderedDict() # type: Dict[text_type, Any]
         odict['question'] = option.question_id
         odict['text'] = option.text
         if option.question.show_count:

@@ -13,7 +13,7 @@ import six
 from six import text_type
 from typing import cast, List
 
-exclude = [] # type: List[str]
+exclude = ['main/models.py'] # type: List[str]
 
 parser = argparse.ArgumentParser(description="Run mypy on files tracked by git.")
 parser.add_argument('targets', nargs='*', default=[],
@@ -43,7 +43,7 @@ if six.PY2:
     print("Warning: You're running python 2.")
 if python_files:
     os.environ["MYPYPATH"] = os.path.join(BASE_DIR, "stubs")
-    base_args = ['mypy', "--fast-parser", "--silent-import", "--disallow-untyped-defs"]
+    base_args = ['mypy', "--disallow-untyped-defs", "--fast-parser"]
     rc1 = subprocess.call(base_args + py2arg + python_files)
     os.chdir('devel')
     rc2 = subprocess.call(base_args + py2arg + lister_files)
