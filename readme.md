@@ -60,7 +60,12 @@ Licensed under [GNU GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)
 
 ## Third party code
 
-* From [Zulip](https://github.com/zulip/zulip/):
-    * `devel/lister.py`
-    * `devel/lint_all.py`
-    * `devel/run-mypy`
+Some code has been copied from [Zulip](https://github.com/zulip/zulip/)'s `tools/`.
+All that code is placed in `devel/`. Some of those files have been renamed.
+
+## mypy
+
+[mypy](http://mypy-lang.org/) is a compile-time static type checker for Python,
+allowing optional, gradual typing of Python code.
+All code in poller is annotated for type checking by mypy.
+django stubs have also been made to enhance type checking.
